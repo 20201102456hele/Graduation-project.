@@ -1,46 +1,30 @@
-/*
- * @Date: 2022-09-25 20:05:01
- * @Description: tab面板的操作方法
+/**
+ * v-clickOutside
+ * 点击元素外部事件
+ * 接收参数：function类型，点击外面时返回true,点击内部时返回false
  */
-
-/** 关闭当前标签 */
-export const closeCurrentTab = (nextPath?: string) => {
-  /** 拿到tab组件 */
-  const tab = document.getElementById('vueAdminBoxTabCloseSelf')
-  if (nextPath) {
-    /** 设置下一个tab的路径 */
-    tab?.setAttribute('nextpath', nextPath)
+import type { Directive, DirectiveBinding } from 'vue'
+interface ElType extends HTMLElement {
+  __handleClick__: any
+}
+const directive: Directive = {
+  mounted(el: ElType, binding: DirectiveBinding) {
+    if (typeof binding.value !== 'function') {
+      throw 'callback must be a function'
+    }
+    el.__handleClick__ = function(e) {
+      if (el.contains(e.target)) {
+        binding.value(false)
+      } else {
+        binding.value(true)
+      }
+      
+    }
+    document.addEventListener('click', el.__handleClick__)
+  },
+  beforeUnmount(el: ElType) {
+    document.removeEventListener('click', el.__handleClick__)
   }
-  /** 触发tab事件点击 */
-  tab?.click()
-  if (nextPath) {
-    setTimeout(() => {
-      /** 清除下一个tab的路径 */
-      tab?.removeAttribute('nextpath')
-    }, 100)
-  }
 }
 
-/** 关闭其他标签 */
-export const closeOtherTab = () => {
-  /** 拿到tab组件 */
-  const tab = document.getElementById('vueAdminBoxTabCloseOther')
-  /** 触发tab事件点击 */
-  tab?.click()
-}
-
-/** 关闭所有标签 */
-export const closeAllTab = () => {
-  /** 拿到tab组件 */
-  const tab = document.getElementById('vueAdminBoxTabCloseAll')
-  /** 触发tab事件点击 */
-  tab?.click()
-}
-
-/** 刷新当前标签 */
-export const refreshCurrentTab = () => {
-  /** 拿到tab组件 */
-  const tab = document.getElementById('vueAdminBoxTabRefresh')
-  /** 触发tab事件点击 */
-  tab?.click()
-}
+export default directive
